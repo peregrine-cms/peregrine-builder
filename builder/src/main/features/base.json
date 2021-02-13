@@ -98,7 +98,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.resourceresolver:1.7.0",
+            "id":"org.apache.sling:org.apache.sling.resourceresolver:1.7.2",
             "start-order":"20"
         },
         {
@@ -110,7 +110,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.servlets.post:2.3.36",
+            "id":"org.apache.sling:org.apache.sling.servlets.post:2.4.2",
             "start-order":"20"
         },
         {
@@ -331,6 +331,11 @@
         "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~jcr-usermanager":{
             "user.mapping":[
                 "org.apache.sling.jcr.jackrabbit.usermanager=[sling-jcr-usermanager]"
+            ]
+        },
+        "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~jcr-contentloader":{
+            "user.mapping":[
+                "org.apache.sling.jcr.contentloader=[sling-jcr-content-loader]"
             ]
         }
     },
