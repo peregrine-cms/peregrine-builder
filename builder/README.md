@@ -10,7 +10,7 @@ It runs on [Apache Sling](https://sling.apache.org) project.
         directory. It is advisable to use a work directory outside of the
         project directory.
 
-1) Build the Sling Starter using `mvn clean install` in the `builder` directory.
+1) Build the Sling Starter using `mvn clean install` in the this directory.
 2) Copy the launch to project directory `cp target/dependency/org.apache.sling.feature.launcher.jar $path-to-project`
 3) Copy either one of the feature archives (*.far) or individual set of feature.json files to your project folder
 
