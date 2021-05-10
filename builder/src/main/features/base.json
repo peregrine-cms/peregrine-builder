@@ -214,14 +214,6 @@
             "start-order":"10"
         },
         {
-            "id":"io.dropwizard.metrics:metrics-core:3.2.6",
-            "start-order":"15"
-        },
-        {
-            "id":"org.apache.sling:org.apache.sling.commons.metrics:1.2.8",
-            "start-order":"15"
-        },
-        {
             "id":"org.apache.sling:org.apache.sling.resource.filter:1.0.0",
             "start-order":"15"
         },
