@@ -1,0 +1,22 @@
+{
+  "name": "peregrine-builder",
+  "version": "1.0.0",
+  "description": "peregrine-builder ====",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peregrine-cms/peregrine-builder.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/peregrine-cms/peregrine-builder/issues"
+  },
+  "homepage": "https://github.com/peregrine-cms/peregrine-builder#readme",
+  "dependencies": {
+    "fs-extra": "^10.0.0"
+  }
+}

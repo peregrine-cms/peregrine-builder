@@ -1,3 +1,4 @@
 target
 sling-org-apache-sling-starter
 builder/sling
+node_modules
