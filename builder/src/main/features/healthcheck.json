@@ -6,11 +6,11 @@
             "start-order":"5"
         },
         {
-            "id":"org.apache.felix:org.apache.felix.healthcheck.core:2.0.8",
+            "id":"org.apache.felix:org.apache.felix.healthcheck.core:2.0.10",
             "start-order":"5"
         },
         {
-            "id":"org.apache.felix:org.apache.felix.healthcheck.generalchecks:2.0.6",
+            "id":"org.apache.felix:org.apache.felix.healthcheck.generalchecks:2.0.14",
             "start-order":"5"
         },
         {
@@ -87,7 +87,7 @@
                 "systemalive"
             ],
             "autoDisableFilter":true,
-            "responseTextFor503":"classpath:com.peregrine-cms.base.core:SLING-INF/content/startup/index.html"
+            "responseTextFor503":"classpath:org.apache.sling.starter.content:content/content/startup/index.html"
         },
         "org.apache.felix.hc.core.impl.servlet.HealthCheckExecutorServlet~default":{
             "servletPath":"/system/health"
