@@ -9,7 +9,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.commons:commons-lang3:3.11",
+            "id":"org.apache.commons:commons-lang3:3.12.0",
             "start-order":"1"
         },
         {
@@ -17,7 +17,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.felix:org.apache.felix.converter:1.0.14",
+            "id":"org.apache.felix:org.apache.felix.converter:1.0.18",
             "start-order":"1"
         },
         {
@@ -41,7 +41,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.jaxb-impl:2.2.11_1",
+            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.jaxb-runtime:2.3.2_3",
             "start-order":"1"
         },
         {
@@ -49,7 +49,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.servicemix.specs:org.apache.servicemix.specs.jaxb-api-2.2:2.9.0",
+            "id":"org.apache.servicemix.specs:org.apache.servicemix.specs.jaxb-api-2.3:2.3_3",
             "start-order":"1"
         },
         {
@@ -65,7 +65,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.commons.log:5.1.12",
+            "id":"org.apache.sling:org.apache.sling.commons.log:5.1.14",
             "start-order":"1"
         },
         {
@@ -109,15 +109,15 @@
             "start-order":"1"
         },
         {
-            "id":"org.osgi:org.osgi.util.function:1.1.0",
+            "id":"org.osgi:org.osgi.util.function:1.2.0",
             "start-order":"1"
         },
         {
-            "id":"org.osgi:org.osgi.util.promise:1.1.1",
+            "id":"org.osgi:org.osgi.util.promise:1.2.0",
             "start-order":"1"
         },
         {
-            "id":"org.osgi:org.osgi.util.pushstream:1.0.1",
+            "id":"org.osgi:org.osgi.util.pushstream:1.0.2",
             "start-order":"1"
         },
         {
@@ -133,7 +133,7 @@
             "start-order":"1"
         },
         {
-            "id":"org.apache.felix:org.apache.felix.scr:2.1.26",
+            "id":"org.apache.felix:org.apache.felix.scr:2.1.30",
             "start-order":"1"
         }
 

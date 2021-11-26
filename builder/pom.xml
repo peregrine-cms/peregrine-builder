@@ -34,19 +34,37 @@
         <starter.min.bundles.count>126</starter.min.bundles.count>
 
         <!-- versions to be replaced in the feature files -->
-        <asm.version>9.1</asm.version>
-        <jackrabbit.version>2.20.2</jackrabbit.version>
-        <oak.version>1.38.0</oak.version>
-        <slf4j.version>1.7.30</slf4j.version>
-        <composum.nodes.version>2.6.5</composum.nodes.version>
-        <jackson.version>2.12.1</jackson.version>
-        <groovy.version>3.0.7</groovy.version>
+        <asm.version>9.2</asm.version>
+        <jackrabbit.version>2.20.4</jackrabbit.version>
+        <oak.version>1.40.0</oak.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <composum.nodes.version>3.1.0</composum.nodes.version>
+        <jackson.version>2.13.0</jackson.version>
+        <groovy.version>3.0.9</groovy.version>
         <!-- skip index generation for all builds except for CI and release -->
         <bnd.index.generation.skip>true</bnd.index.generation.skip>
+        <docker.skip>true</docker.skip>
+        <mongo.container.image>mongo:4.4.6</mongo.container.image>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target if="${docker.skip}">
+                                <echo>WARNING: docker.skip is ${docker.skip}, Docker-based tests will not be executed.</echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>ianal-maven-plugin</artifactId>
@@ -80,11 +98,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <replacePropertyVariables>asm.version,jackrabbit.version,groovy.version,oak.version,slf4j.version,composum.nodes.version,jackson.version</replacePropertyVariables>
-                    <framework>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>org.apache.felix.framework</artifactId>
-                        <version>6.0.3</version>
-                    </framework>
                     <aggregates>
                         <aggregate>
                             <classifier>oak_tar</classifier>
@@ -211,7 +224,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
-                <version>0.1.0</version>
+                <version>0.1.1-SNAPSHOT</version>
                 <configuration>
                     <launches>
                         <launch>

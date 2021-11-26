@@ -14,7 +14,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.spi:1.0.2",
+            "id":"org.apache.sling:org.apache.sling.scripting.spi:1.0.4",
             "start-order":"20"
         },
         {
@@ -46,7 +46,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly.compiler:1.2.12-1.4.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.sightly.compiler:1.2.14-1.4.0",
             "start-order":"20"
         },
         {
@@ -58,11 +58,11 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly.runtime:1.2.4-1.4.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.sightly.runtime:1.2.6-1.4.0",
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly:1.4.8-1.4.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.sightly:1.4.14-1.4.0",
             "start-order":"20"
         },
         {
@@ -70,7 +70,7 @@
             "start-order":"20"
         },
         {
-            "id": "org.freemarker:freemarker:2.3.30",
+            "id": "org.freemarker:freemarker:2.3.31",
             "start-order": "20"
         },
         {
