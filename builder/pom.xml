@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>39</version>
+        <version>47</version>
         <relativePath/>
     </parent>
 
@@ -36,35 +36,21 @@
         <!-- versions to be replaced in the feature files -->
         <asm.version>9.2</asm.version>
         <jackrabbit.version>2.20.4</jackrabbit.version>
-        <oak.version>1.40.0</oak.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <composum.nodes.version>3.1.0</composum.nodes.version>
-        <jackson.version>2.13.0</jackson.version>
+        <oak.version>1.42.0</oak.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <composum.nodes.version>4.0.1</composum.nodes.version>
+        <jackson.version>2.13.1</jackson.version>
         <groovy.version>3.0.9</groovy.version>
         <!-- skip index generation for all builds except for CI and release -->
         <bnd.index.generation.skip>true</bnd.index.generation.skip>
         <docker.skip>true</docker.skip>
         <mongo.container.image>mongo:4.4.6</mongo.container.image>
+        <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
+        <project.build.outputTimestamp>1649716190</project.build.outputTimestamp>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target if="${docker.skip}">
-                                <echo>WARNING: docker.skip is ${docker.skip}, Docker-based tests will not be executed.</echo>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>ianal-maven-plugin</artifactId>
@@ -94,7 +80,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>slingfeature-maven-plugin</artifactId>
-                <version>1.4.22</version>
+                <version>1.5.16</version>
                 <extensions>true</extensions>
                 <configuration>
                     <replacePropertyVariables>asm.version,jackrabbit.version,groovy.version,oak.version,slf4j.version,composum.nodes.version,jackson.version</replacePropertyVariables>
@@ -116,14 +102,6 @@
                             <title>Sling With Oak Document NS Mongo Persistence</title>
                         </aggregate>
                         <aggregate>
-                            <classifier>oak_tar_fds</classifier>
-                            <filesInclude>*.json</filesInclude>
-                            <filesInclude>oak/*.json</filesInclude>
-                            <filesInclude>oak/persistence/oak_persistence_sns_fds.json</filesInclude>
-                            <filesInclude>app/*.json</filesInclude>
-                            <title>Sling with Oak Segment NodeStore (sns) and File Datastore (fds)</title>
-                        </aggregate>
-                        <aggregate>
                             <classifier>nosample_base</classifier>
                             <filesInclude>*.json</filesInclude>
                             <filesInclude>oak/*.json</filesInclude>
@@ -134,7 +112,6 @@
                         <scan>
                             <includeClassifier>oak_tar</includeClassifier>
                             <includeClassifier>oak_mongo</includeClassifier>
-                            <includeClassifier>oak_tar_fds</includeClassifier>
                             <includeClassifier>nosample_base</includeClassifier>
                         </scan>
                     </scans>
@@ -146,10 +123,6 @@
                         <archive>
                             <classifier>oak_mongo_far</classifier>
                             <includeClassifier>oak_mongo</includeClassifier>
-                        </archive>
-                        <archive>
-                            <classifier>oak_tar_fds_far</classifier>
-                            <includeClassifier>oak_tar_fds</includeClassifier>
                         </archive>
                     </archives>
                 </configuration>
@@ -164,7 +137,14 @@
                             <goal>attach-featurearchives</goal>
                         </goals>
                     </execution>
-               </executions>
+                    <execution>
+                        <id>create-repository</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repository</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -177,7 +157,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.16</artifact>
+                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.26</artifact>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
@@ -187,7 +167,7 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-indexer-maven-plugin</artifactId>
-                <version>5.2.0</version>
+                <version>6.2.0</version>
                 <executions>
                     <execution>
                         <id>index</id>
@@ -220,11 +200,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target if="${docker.skip}">
+                                <echo>WARNING: docker.skip is ${docker.skip}, Docker-based tests will not be executed.</echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- launch the oak_tar aggregate for the integration tests -->
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
-                <version>0.1.1-SNAPSHOT</version>
+                <version>0.1.2</version>
                 <configuration>
                     <launches>
                         <launch>
@@ -241,6 +237,7 @@
                                     <org.osgi.service.http.port>${http.port}</org.osgi.service.http.port>
                                 </frameworkProperties>
                             </launcherArguments>
+                            <startTimeoutSeconds>${it.startTimeoutSeconds}</startTimeoutSeconds>
                         </launch>
                     </launches>
                 </configuration>
@@ -252,24 +249,33 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>                
+            </plugin>
             <!-- run the ITs -->
             <plugin>
-               <artifactId>maven-failsafe-plugin</artifactId>
-               <executions>
-                   <execution>
-                       <goals>
-                           <goal>integration-test</goal>
-                           <goal>verify</goal>
-                       </goals>
-                   </execution>
-               </executions>
-               <configuration>
-                   <systemPropertyVariables>
-                       <starter.http.port>${http.port}</starter.http.port>
-                       <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
-                   </systemPropertyVariables>
-               </configuration>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <starter.http.port>${http.port}</starter.http.port>
+                        <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
+                        <!-- Comma-separated list of paths to check for 200 status (added for SLING-10402) -->
+                        <starter.check.paths>
+                            /slingshot/users/slingshot1/travel/home/images/home.jpg,
+                            /slingshot/resources/images/background.jpg,
+                            /slingshot/users/slingshot2/places/landing/images/landing.jpg,
+                            /starter.html,
+                            /bin/browser.html,
+                            /system/console/bundles,
+                        </starter.check.paths>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
 
@@ -290,7 +296,7 @@
             </plugins>
         </pluginManagement>
     </build>
-    
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -306,24 +312,24 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
-            <version>1.11.6</version>
+            <version>1.11.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <profiles>
         <profile>
             <!-- enabled during release builds -->
             <id>apache-release</id>
             <properties>
-               <bnd.index.generation.skip>false</bnd.index.generation.skip>
+                <bnd.index.generation.skip>false</bnd.index.generation.skip>
             </properties>
         </profile>
         <profile>
             <!-- enabled during ci builds -->
             <id>ci</id>
             <properties>
-               <bnd.index.generation.skip>false</bnd.index.generation.skip>
+                <bnd.index.generation.skip>false</bnd.index.generation.skip>
             </properties>
         </profile>
     </profiles>
