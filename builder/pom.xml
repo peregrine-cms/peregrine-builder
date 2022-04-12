@@ -267,10 +267,6 @@
                         <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
                         <!-- Comma-separated list of paths to check for 200 status (added for SLING-10402) -->
                         <starter.check.paths>
-                            /slingshot/users/slingshot1/travel/home/images/home.jpg,
-                            /slingshot/resources/images/background.jpg,
-                            /slingshot/users/slingshot2/places/landing/images/landing.jpg,
-                            /starter.html,
                             /bin/browser.html,
                             /system/console/bundles,
                         </starter.check.paths>
