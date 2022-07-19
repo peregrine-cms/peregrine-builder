@@ -16,8 +16,8 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>39</version>
-        <relativePath/>
+        <version>47</version>
+        <relativePath />
     </parent>
 
     <groupId>com.peregrine-cms</groupId>
@@ -36,15 +36,19 @@
         <!-- versions to be replaced in the feature files -->
         <asm.version>9.2</asm.version>
         <jackrabbit.version>2.20.4</jackrabbit.version>
-        <oak.version>1.40.0</oak.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <composum.nodes.version>3.1.0</composum.nodes.version>
-        <jackson.version>2.13.0</jackson.version>
+        <oak.version>1.42.0</oak.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <composum.nodes.version>4.0.1</composum.nodes.version>
+        <jackson.version>2.13.1</jackson.version>
         <groovy.version>3.0.9</groovy.version>
         <!-- skip index generation for all builds except for CI and release -->
         <bnd.index.generation.skip>true</bnd.index.generation.skip>
         <docker.skip>true</docker.skip>
+        <docker.label>snapshot</docker.label>
         <mongo.container.image>mongo:4.4.6</mongo.container.image>
+        <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
+        <!-- used for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.htm), automatically updated during release -->
+        <project.build.outputTimestamp>1647263058</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -94,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>slingfeature-maven-plugin</artifactId>
-                <version>1.4.22</version>
+                <version>1.5.16</version>
                 <extensions>true</extensions>
                 <configuration>
                     <replacePropertyVariables>asm.version,jackrabbit.version,groovy.version,oak.version,slf4j.version,composum.nodes.version,jackson.version</replacePropertyVariables>
@@ -177,7 +181,8 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.16</artifact>
+                            <!-- 1.1.28 and newer versions don't work out-of-the-box due to SLING-10956 -->
+                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.26</artifact>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
@@ -187,7 +192,7 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-indexer-maven-plugin</artifactId>
-                <version>5.2.0</version>
+                <version>6.2.0</version>
                 <executions>
                     <execution>
                         <id>index</id>
@@ -306,7 +311,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
-            <version>1.11.6</version>
+            <version>1.11.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

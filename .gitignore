@@ -1,3 +1,5 @@
 target
 sling-org-apache-sling-starter
 builder/sling
+*.iml
+.idea
