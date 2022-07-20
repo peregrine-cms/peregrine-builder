@@ -129,6 +129,13 @@
                             <includeClassifier>oak_tar_fds</includeClassifier>
                         </archive>
                     </archives>
+                    <repositories>
+                        <repository>
+                            <includeClassifier>oak_tar</includeClassifier>
+                            <includeClassifier>oak_mongo</includeClassifier>
+                            <includeClassifier>docker</includeClassifier>
+                        </repository>
+                    </repositories>
                 </configuration>
                 <executions>
                     <execution>
@@ -139,6 +146,13 @@
                             <goal>analyse-features</goal>
                             <goal>attach-features</goal>
                             <goal>attach-featurearchives</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-repository</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repository</goal>
                         </goals>
                     </execution>
                </executions>
@@ -179,7 +193,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- reserve a network port for the integration tests -->
+            <!-- reserve network ports for the integration tests -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -193,6 +207,8 @@
                         <configuration>
                             <portNames>
                                 <portName>http.port</portName>
+                                <portName>http.port.mongo</portName>
+                                <portName>mongo.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
@@ -202,7 +218,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
@@ -214,7 +230,69 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- launch the oak_tar aggregate for the integration tests -->
+            <!--
+                Start a MongoDB container for the corresponding tests.
+                Must be declared before the feature-launcher-maven-plugin
+                so that the container is up before the corresponding Sling
+                instance starts.
+            -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.39.0</version>
+                <configuration>
+                    <skip>${docker.skip}</skip>
+                    <images>
+                        <image>
+                            <alias>mongo</alias>
+                            <name>${mongo.container.image}</name>
+                            <run>
+                                <ports>
+                                    <port>${mongo.port}:27017</port>
+                                </ports>
+                                <wait>
+                                    <log>CONTROL</log>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
+                            <name>apache/sling:${docker.label}</name>
+                            <build>
+                                <dockerFile>Dockerfile</dockerFile>
+                                <contextDir>${project.basedir}</contextDir>
+                            </build>
+                        </image>
+                    </images>
+                    <stopMode>kill</stopMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-mongo</id>
+                        <!-- must run prior feature-launcher-maven-plugin:start  -->
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-mongo</id>
+                        <!-- must run after feature-launcher-maven-plugin:stop  -->
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- launch the Sling instances to test -->
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
@@ -235,6 +313,27 @@
                                     <org.osgi.service.http.port>${http.port}</org.osgi.service.http.port>
                                 </frameworkProperties>
                             </launcherArguments>
+                            <startTimeoutSeconds>${it.startTimeoutSeconds}</startTimeoutSeconds>
+                        </launch>
+                        <launch>
+                            <id>sling-12-oak-mongo</id>
+                            <skip>${docker.skip}</skip>
+                            <feature>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${project.version}</version>
+                                <classifier>oak_mongo</classifier>
+                                <type>slingosgifeature</type>
+                            </feature>
+                            <launcherArguments>
+                                <frameworkProperties>
+                                    <org.osgi.service.http.port>${http.port.mongo}</org.osgi.service.http.port>
+                                </frameworkProperties>
+                            </launcherArguments>
+                            <environmentVariables>
+                                <MONGODB_PORT>${mongo.port}</MONGODB_PORT>
+                            </environmentVariables>
+                            <startTimeoutSeconds>${it.startTimeoutSeconds}</startTimeoutSeconds>
                         </launch>
                     </launches>
                 </configuration>
@@ -246,7 +345,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>                
+            </plugin>
             <!-- run the ITs -->
             <plugin>
                <artifactId>maven-failsafe-plugin</artifactId>
@@ -260,8 +359,15 @@
                </executions>
                <configuration>
                    <systemPropertyVariables>
-                       <starter.http.port>${http.port}</starter.http.port>
+                       <starter.http.test.ports>false:${http.port},${docker.skip}:${http.port.mongo}</starter.http.test.ports>
                        <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
+                       <!-- Comma-separated list of paths to check for 200 status (added for SLING-10402) -->
+                       <starter.check.paths>
+                            /starter.html,
+                            /bin/browser.html,
+                            /system/console/bundles,
+                        </starter.check.paths>
+                       <starter.min.tests.pass>3</starter.min.tests.pass>
                    </systemPropertyVariables>
                </configuration>
             </plugin>
@@ -316,8 +422,15 @@
         <profile>
             <!-- enabled during ci builds -->
             <id>ci</id>
+            <!-- enabled during ci builds -->
+            <activation>
+                <property>
+                    <name>ci</name>
+                </property>
+            </activation>
             <properties>
                <bnd.index.generation.skip>false</bnd.index.generation.skip>
+               <docker.skip>false</docker.skip>
             </properties>
         </profile>
     </profiles>
