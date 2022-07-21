@@ -18,11 +18,15 @@ package org.apache.sling.launchpad;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,32 +47,58 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+@RunWith(Parameterized.class)
 public class SmokeIT {
+    private static final String CHECK_PATHS_PROPERTY = "starter.check.paths";
+    private static final String MIN_PATH_PASSED_PROPERTY = "starter.min.tests.pass";
 
-    private static final int STARTER_HTTP_PORT = Integer.getInteger("starter.http.port", 8080);
+    private final int slingHttpPort;
     private static final int STARTER_MIN_BUNDLES_COUNT = Integer.getInteger("starter.min.bundles.count", Integer.MAX_VALUE);
 
-    @ClassRule
-    public static StarterReadyRule LAUNCHPAD = new StarterReadyRule(STARTER_HTTP_PORT);
+    @Rule
+    public final StarterReadyRule launchpadRule;
     private HttpClientContext httpClientContext;
+
+    @Parameterized.Parameters(name = "Port: {0,number,#}")
+    public static Collection<Object[]> data() {
+        // This is a string of Sling instance port numbers to test, like
+        //     false:80,true:1234
+        // meaning: do not skip testing on port 80 but skip testing port 1234
+        final Stream<String> portDefs = Stream.of(System.getProperty("starter.http.test.ports").split(","));
+        final List<Object[]> result = new ArrayList<>();
+        portDefs.forEach(def -> {
+            final String [] parts = def.split(":");
+            if("false".equals(parts[0])) {
+                result.add(new Object[]{Integer.valueOf(parts[1].trim())});
+            }
+        });
+        return result;
+    }
+
+    public SmokeIT(int slingHttpPort) {
+        this.slingHttpPort = slingHttpPort;
+        launchpadRule = new StarterReadyRule(slingHttpPort);
+    }
 
     @Before
     public void prepareHttpContext() {
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         UsernamePasswordCredentials creds = new UsernamePasswordCredentials("admin", "admin");
-        credsProvider.setCredentials(new AuthScope("localhost", STARTER_HTTP_PORT), creds);
+        credsProvider.setCredentials(new AuthScope("localhost", slingHttpPort), creds);
 
         BasicAuthCache authCache = new BasicAuthCache();
         BasicScheme basicAuth = new BasicScheme();
-        authCache.put(new HttpHost("localhost", STARTER_HTTP_PORT, "http"), basicAuth);
+        authCache.put(new HttpHost("localhost", slingHttpPort, "http"), basicAuth);
 
         httpClientContext = HttpClientContext.create();
         httpClientContext.setCredentialsProvider(credsProvider);
@@ -87,7 +117,7 @@ public class SmokeIT {
 
         try ( CloseableHttpClient client = newClient() ) {
 
-            HttpGet get = new HttpGet("http://localhost:" + STARTER_HTTP_PORT + "/system/console/bundles.json");
+            HttpGet get = new HttpGet("http://localhost:" + slingHttpPort + "/system/console/bundles.json");
 
             // pass the context to ensure preemptive basic auth is used
             // https://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html
@@ -148,7 +178,7 @@ public class SmokeIT {
     public void ensureRepositoryIsStarted() throws Exception {
         try ( CloseableHttpClient client = newClient() ) {
 
-            HttpGet get = new HttpGet("http://localhost:" + STARTER_HTTP_PORT + "/server/default/jcr:root/content");
+            HttpGet get = new HttpGet("http://localhost:" + slingHttpPort + "/server/default/jcr:root/content");
 
             try ( CloseableHttpResponse response = client.execute(get) ) {
 
@@ -172,6 +202,33 @@ public class SmokeIT {
                 assertThat("Invalid name attribute value", nameAttr.getNodeValue(), equalTo("content"));
             }
         }
+    }
+
+    /**
+     * For testing the SLING-10402 scenario
+     */
+    @Test
+    public void checkReadableUrls() throws Exception {
+        final int TRIES = 10;
+        final int WAIT_BETWEEN_TRIES_MILLIS = 1000;
+
+        final String baseURL = String.format("http://localhost:%d", slingHttpPort);
+        final List<UrlCheck> checks = new ArrayList<>();
+        final int minTests = Integer.parseInt(System.getProperty(MIN_PATH_PASSED_PROPERTY, "6"));
+        Stream.of(System.getProperty(CHECK_PATHS_PROPERTY).split(","))
+            .map(path -> path.trim())
+            .filter(path -> !path.isEmpty())
+            .forEach(path -> checks.add(new UrlCheck(baseURL, path))
+        );
+
+        try ( CloseableHttpClient client = newClient() ) {
+            UrlCheck.runAll(client, TRIES, WAIT_BETWEEN_TRIES_MILLIS, checks);
+        }
+
+        assertTrue(
+            String.format("Expecting at least %d tests, got %d", minTests, checks.size()), 
+            checks.size() >= minTests
+        );
     }
 
     static class BundleStatus {

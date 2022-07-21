@@ -16,8 +16,8 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>39</version>
-        <relativePath/>
+        <version>47</version>
+        <relativePath />
     </parent>
 
     <groupId>com.peregrine-cms</groupId>
@@ -36,46 +36,23 @@
         <!-- versions to be replaced in the feature files -->
         <asm.version>9.2</asm.version>
         <jackrabbit.version>2.20.4</jackrabbit.version>
-        <oak.version>1.40.0</oak.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <composum.nodes.version>3.1.0</composum.nodes.version>
-        <jackson.version>2.13.0</jackson.version>
+        <oak.version>1.42.0</oak.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <composum.nodes.version>4.0.1</composum.nodes.version>
+        <jackson.version>2.13.1</jackson.version>
         <groovy.version>3.0.9</groovy.version>
         <!-- skip index generation for all builds except for CI and release -->
         <bnd.index.generation.skip>true</bnd.index.generation.skip>
         <docker.skip>true</docker.skip>
+        <docker.label>snapshot</docker.label>
         <mongo.container.image>mongo:4.4.6</mongo.container.image>
+        <it.startTimeoutSeconds>60</it.startTimeoutSeconds>
+        <!-- used for reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.htm), automatically updated during release -->
+        <project.build.outputTimestamp>1647263058</project.build.outputTimestamp>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target if="${docker.skip}">
-                                <echo>WARNING: docker.skip is ${docker.skip}, Docker-based tests will not be executed.</echo>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>ianal-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>verify-legal-files</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
@@ -94,7 +71,7 @@
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>slingfeature-maven-plugin</artifactId>
-                <version>1.4.22</version>
+                <version>1.5.16</version>
                 <extensions>true</extensions>
                 <configuration>
                     <replacePropertyVariables>asm.version,jackrabbit.version,groovy.version,oak.version,slf4j.version,composum.nodes.version,jackson.version</replacePropertyVariables>
@@ -152,6 +129,13 @@
                             <includeClassifier>oak_tar_fds</includeClassifier>
                         </archive>
                     </archives>
+                    <repositories>
+                        <repository>
+                            <includeClassifier>oak_tar</includeClassifier>
+                            <includeClassifier>oak_mongo</includeClassifier>
+                            <includeClassifier>docker</includeClassifier>
+                        </repository>
+                    </repositories>
                 </configuration>
                 <executions>
                     <execution>
@@ -162,6 +146,13 @@
                             <goal>analyse-features</goal>
                             <goal>attach-features</goal>
                             <goal>attach-featurearchives</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-repository</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repository</goal>
                         </goals>
                     </execution>
                </executions>
@@ -177,7 +168,8 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.16</artifact>
+                            <!-- 1.1.28 and newer versions don't work out-of-the-box due to SLING-10956 -->
+                            <artifact>org.apache.sling:org.apache.sling.feature.launcher:1.1.26</artifact>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
@@ -187,7 +179,7 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-indexer-maven-plugin</artifactId>
-                <version>5.2.0</version>
+                <version>6.2.0</version>
                 <executions>
                     <execution>
                         <id>index</id>
@@ -201,7 +193,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- reserve a network port for the integration tests -->
+            <!-- reserve network ports for the integration tests -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -215,16 +207,96 @@
                         <configuration>
                             <portNames>
                                 <portName>http.port</portName>
+                                <portName>http.port.mongo</portName>
+                                <portName>mongo.port</portName>
                             </portNames>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            <!-- launch the oak_tar aggregate for the integration tests -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target if="${docker.skip}">
+                                <echo>WARNING: docker.skip is ${docker.skip}, Docker-based tests will not be executed.</echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
+                Start a MongoDB container for the corresponding tests.
+                Must be declared before the feature-launcher-maven-plugin
+                so that the container is up before the corresponding Sling
+                instance starts.
+            -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.39.0</version>
+                <configuration>
+                    <skip>${docker.skip}</skip>
+                    <images>
+                        <image>
+                            <alias>mongo</alias>
+                            <name>${mongo.container.image}</name>
+                            <run>
+                                <ports>
+                                    <port>${mongo.port}:27017</port>
+                                </ports>
+                                <wait>
+                                    <log>CONTROL</log>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
+                            <name>apache/sling:${docker.label}</name>
+                            <build>
+                                <dockerFile>Dockerfile</dockerFile>
+                                <contextDir>${project.basedir}</contextDir>
+                            </build>
+                        </image>
+                    </images>
+                    <stopMode>kill</stopMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-mongo</id>
+                        <!-- must run prior feature-launcher-maven-plugin:start  -->
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-mongo</id>
+                        <!-- must run after feature-launcher-maven-plugin:stop  -->
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- launch the Sling instances to test -->
             <plugin>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>feature-launcher-maven-plugin</artifactId>
-                <version>0.1.1-SNAPSHOT</version>
+                <version>0.1.2</version>
                 <configuration>
                     <launches>
                         <launch>
@@ -241,6 +313,27 @@
                                     <org.osgi.service.http.port>${http.port}</org.osgi.service.http.port>
                                 </frameworkProperties>
                             </launcherArguments>
+                            <startTimeoutSeconds>${it.startTimeoutSeconds}</startTimeoutSeconds>
+                        </launch>
+                        <launch>
+                            <id>sling-12-oak-mongo</id>
+                            <skip>${docker.skip}</skip>
+                            <feature>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${project.version}</version>
+                                <classifier>oak_mongo</classifier>
+                                <type>slingosgifeature</type>
+                            </feature>
+                            <launcherArguments>
+                                <frameworkProperties>
+                                    <org.osgi.service.http.port>${http.port.mongo}</org.osgi.service.http.port>
+                                </frameworkProperties>
+                            </launcherArguments>
+                            <environmentVariables>
+                                <MONGODB_PORT>${mongo.port}</MONGODB_PORT>
+                            </environmentVariables>
+                            <startTimeoutSeconds>${it.startTimeoutSeconds}</startTimeoutSeconds>
                         </launch>
                     </launches>
                 </configuration>
@@ -252,7 +345,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>                
+            </plugin>
             <!-- run the ITs -->
             <plugin>
                <artifactId>maven-failsafe-plugin</artifactId>
@@ -266,8 +359,15 @@
                </executions>
                <configuration>
                    <systemPropertyVariables>
-                       <starter.http.port>${http.port}</starter.http.port>
+                       <starter.http.test.ports>false:${http.port},${docker.skip}:${http.port.mongo}</starter.http.test.ports>
                        <starter.min.bundles.count>${starter.min.bundles.count}</starter.min.bundles.count>
+                       <!-- Comma-separated list of paths to check for 200 status (added for SLING-10402) -->
+                       <starter.check.paths>
+                            /starter.html,
+                            /bin/browser.html,
+                            /system/console/bundles,
+                        </starter.check.paths>
+                       <starter.min.tests.pass>3</starter.min.tests.pass>
                    </systemPropertyVariables>
                </configuration>
             </plugin>
@@ -306,7 +406,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
-            <version>1.11.6</version>
+            <version>1.11.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -322,8 +422,15 @@
         <profile>
             <!-- enabled during ci builds -->
             <id>ci</id>
+            <!-- enabled during ci builds -->
+            <activation>
+                <property>
+                    <name>ci</name>
+                </property>
+            </activation>
             <properties>
                <bnd.index.generation.skip>false</bnd.index.generation.skip>
+               <docker.skip>false</docker.skip>
             </properties>
         </profile>
     </profiles>
