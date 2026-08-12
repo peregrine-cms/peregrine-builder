@@ -2,18 +2,14 @@
   "id":"${project.groupId}:${project.artifactId}:slingosgifeature:test-content:${project.version}",  
   "bundles":[
     {
-      "id": "org.apache.sling:org.apache.sling.launchpad.test-fragment:13-SNAPSHOT",
-      "start-order": "25"
-    },
-    {
-      "id": "org.apache.sling:org.apache.sling.launchpad.test-services:13-SNAPSHOT",
+      "id": "org.apache.sling:org.apache.sling.starter.test-services:14",
       "start-order": "25"
     }
   ],
   "configurations": {
     "org.apache.sling.jcr.base.internal.LoginAdminWhitelist.fragment~test-content": {
       "whitelist.bundles": [
-        "org.apache.sling.launchpad.test-services"
+        "org.apache.sling.starter.test-services"
       ],
       "whitelist.name" :"test-content"
     },

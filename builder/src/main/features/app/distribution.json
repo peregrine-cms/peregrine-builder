@@ -2,6 +2,10 @@
 {
     "bundles":[
         {
+            "id":"org.apache.sling:org.apache.sling.commons.johnzon:1.2.16",
+            "start-order":"1"
+        },
+        {
             "id":"org.apache.sling:org.apache.sling.distribution.api:0.4.0",
             "start-order":"20"
         },

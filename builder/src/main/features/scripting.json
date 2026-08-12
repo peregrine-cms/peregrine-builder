@@ -10,15 +10,15 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.api:2.2.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.api:2.2.2",
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.spi:1.0.4",
+            "id":"org.apache.sling:org.apache.sling.scripting.spi:2.0.0",
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.core:2.4.8",
+            "id":"org.apache.sling:org.apache.sling.scripting.core:3.0.2",
             "start-order":"20"
         },
         {
@@ -34,7 +34,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.jsp.taglib:2.4.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.jsp.taglib:2.4.2",
             "start-order":"20"
         },
         {
@@ -50,7 +50,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly.js.provider:1.2.10",
+            "id":"org.apache.sling:org.apache.sling.scripting.sightly.js.provider:1.2.14",
             "start-order":"20"
         },
         {
@@ -58,7 +58,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly:1.4.24-1.4.0",
+            "id":"org.apache.sling:org.apache.sling.scripting.sightly:2.0.0-1.4.0",
             "start-order":"20"
         },
         {
@@ -66,7 +66,7 @@
             "start-order":"20"
         },
         {
-            "id": "org.freemarker:freemarker:2.3.32",
+            "id": "org.freemarker:freemarker:2.3.34",
             "start-order": "20"
         },
         {
@@ -74,7 +74,7 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.thymeleaf:3.0.15.RELEASE_1",
+            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.thymeleaf:3.1.2.RELEASE_1",
             "start-order":"20"
         },
         {
