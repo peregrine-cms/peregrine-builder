@@ -29,6 +29,10 @@
 
     <properties>
         <sling.java.version>17</sling.java.version>
+        <!-- The ESP (Rhino server-side JavaScript) engine is deliberately
+             removed from this launchpad (dead weight, empirically broken);
+             the starter's ESP integration tests test the absent feature. -->
+        <failsafe.exclude>**/EspLoadTest.java,org.apache.sling.starter.webapp.integrationtest.ExecuteScriptTest#testEspScript</failsafe.exclude>
         <starter.min.bundles.count>126</starter.min.bundles.count>
         <sling.feature.launcher.version>1.3.4</sling.feature.launcher.version>
 

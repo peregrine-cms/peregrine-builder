@@ -1,12 +1,7 @@
-
 {
     "bundles":[
         {
             "id":"org.antlr:antlr4-runtime:4.7.1",
-            "start-order":"20"
-        },
-        {
-            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.rhino:1.7.15_1",
             "start-order":"20"
         },
         {
@@ -23,10 +18,6 @@
         },
         {
             "id":"org.apache.sling:org.apache.sling.scripting.el-api:1.0.4",
-            "start-order":"20"
-        },
-        {
-            "id":"org.apache.sling:org.apache.sling.scripting.javascript:3.1.4",
             "start-order":"20"
         },
         {
@@ -50,61 +41,18 @@
             "start-order":"20"
         },
         {
-            "id":"org.apache.sling:org.apache.sling.scripting.sightly.js.provider:1.2.14",
-            "start-order":"20"
-        },
-        {
             "id":"org.apache.sling:org.apache.sling.scripting.sightly.runtime:1.2.6-1.4.0",
             "start-order":"20"
         },
         {
             "id":"org.apache.sling:org.apache.sling.scripting.sightly:2.0.0-1.4.0",
             "start-order":"20"
-        },
-        {
-            "id":"org.apache.sling:org.apache.sling.scripting.freemarker:1.0.4",
-            "start-order":"20"
-        },
-        {
-            "id": "org.freemarker:freemarker:2.3.34",
-            "start-order": "20"
-        },
-        {
-            "id":"org.apache.sling:org.apache.sling.scripting.thymeleaf:2.0.2",
-            "start-order":"20"
-        },
-        {
-            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.thymeleaf:3.1.2.RELEASE_1",
-            "start-order":"20"
-        },
-        {
-            "id":"org.attoparser:attoparser:2.0.7.RELEASE",
-            "start-order":"20"
-        },
-        {
-            "id":"org.unbescape:unbescape:1.1.6.RELEASE",
-            "start-order":"20"
-        },
-        {
-            "id":"org.apache.servicemix.bundles:org.apache.servicemix.bundles.ognl:3.3.4_1",
-            "start-order":"20"
-        },
-        {
-            "id":"org.javassist:javassist:3.30.2-GA",
-            "start-order":"20"
         }
     ],
     "configurations":{
-        "org.apache.sling.scripting.core.impl.ScriptCacheImpl":{
-            "org.apache.sling.scripting.cache.additional_extensions":[
-                "js"
-            ]
-        },
         "org.apache.sling.serviceusermapping.impl.ServiceUserMapperImpl.amended~scripting":{
             "user.mapping":[
-                "org.apache.sling.scripting.core=[sling-search-path-reader]",
-                "org.apache.sling.scripting.sightly.js.provider=[sling-search-path-reader]",
-                "org.apache.sling.scripting.thymeleaf=[sling-search-path-reader]"
+                "org.apache.sling.scripting.core=[sling-search-path-reader]"
             ]
         }
     }
